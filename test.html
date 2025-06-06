@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cẩm Nang Dinh Dưỡng: Gút - Tim Mạch - Huyết Áp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Health (Soft Green, Neutral Beige, Light Blue accent) -->
+    <!-- Application Structure Plan: A tab-based, dashboard-style Single Page Application (SPA). This structure is chosen to transform the dense, linear report into a user-friendly, task-oriented tool. The tabs (Tổng Quan, Tra Cứu Thực Phẩm, Nguyên Tắc Vàng, Thực Đơn Mẫu) allow users to directly access the information they need most (e.g., "What can I eat?") without overwhelming them with text. The user flow is designed to be non-linear, encouraging exploration starting from a high-level overview, drilling down to specific food details, understanding the underlying principles, and finally seeing practical application in a sample menu. This architecture prioritizes usability and quick information retrieval over mirroring the report's original format. -->
+    <!-- Visualization & Content Choices: 
+        1. Overview: A donut chart (Chart.js) visualizes the distribution of foods across four recommendation levels, providing an instant summary of the diet's philosophy. Goal: Inform/Orient. Interaction: Hover tooltips.
+        2. Food Lookup: An interactive, filterable grid of cards. Goal: Organize/Compare. Interaction: Live search and category filtering. This is the core interactive feature, making data highly accessible. Justification: Directly answers the user's primary question.
+        3. Principles: Accordion-style collapsible sections. Goal: Inform (detailed). Interaction: Click-to-expand. Justification: Prevents "wall of text" and allows focused reading.
+        4. Sample Menu: Clean, structured layout with icons. Goal: Inform (practical). Interaction: Static but clearly presented. Justification: Provides an actionable template.
+        All visualizations and layouts are built with HTML/Tailwind/JS, adhering to the no-SVG/Mermaid constraint. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            border-color: #2dd4bf;
+            background-color: #ccfbf1;
+            color: #0d9488;
+            font-weight: 600;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .food-card {
+            border-left-width: 6px;
+        }
+        .level-1 { border-color: #34d399; background-color: #f0fdf4; }
+        .level-2 { border-color: #facc15; background-color: #fefce8; }
+        .level-3 { border-color: #fb923c; background-color: #fff7ed; }
+        .level-4 { border-color: #f87171; background-color: #fef2f2; }
+
+        .level-1-text { color: #065f46; }
+        .level-2-text { color: #854d0e; }
+        .level-3-text { color: #9a3412; }
+        .level-4-text { color: #991b1b; }
+        
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+            max-width: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-width: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-700">Cẩm Nang Dinh dưỡng</h1>
+            <p class="text-slate-600 mt-2 text-lg">Cho người bệnh Gút, Tim mạch & Cao huyết áp</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center border-b border-slate-200 mb-8 gap-2">
+            <button data-tab="overview" class="tab-btn px-4 py-3 text-sm md:text-base border-b-4 border-transparent hover:bg-slate-100 rounded-t-lg">📊 Tổng Quan</button>
+            <button data-tab="lookup" class="tab-btn px-4 py-3 text-sm md:text-base border-b-4 border-transparent hover:bg-slate-100 rounded-t-lg">🔍 Tra Cứu Thực Phẩm</button>
+            <button data-tab="principles" class="tab-btn px-4 py-3 text-sm md:text-base border-b-4 border-transparent hover:bg-slate-100 rounded-t-lg">🌟 Nguyên Tắc Vàng</button>
+            <button data-tab="menu" class="tab-btn px-4 py-3 text-sm md:text-base border-b-4 border-transparent hover:bg-slate-100 rounded-t-lg">🍽️ Thực Đơn Mẫu</button>
+            <button data-tab="add-food" class="tab-btn px-4 py-3 text-sm md:text-base border-b-4 border-transparent hover:bg-slate-100 rounded-t-lg">➕ Thêm Thực Phẩm</button>
+        </nav>
+
+        <main>
+            <div id="overview-content" class="content-section">
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                     <h2 class="text-2xl font-bold text-teal-600 mb-4">Chào mừng bạn đến với Cẩm nang Dinh dưỡng Tương tác</h2>
+                     <p class="text-slate-600 leading-relaxed">Phần tổng quan này cung cấp cho bạn một cái nhìn bao quát về các nguyên tắc dinh dưỡng cốt lõi và sự phân bổ các nhóm thực phẩm được khuyến nghị. Mục tiêu là giúp bạn nhanh chóng nắm bắt triết lý ăn uống lành mạnh để quản lý đồng thời cả ba tình trạng: Gút, Tim mạch và Cao huyết áp. Hãy bắt đầu hành trình chăm sóc sức khỏe của bạn từ đây.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-semibold mb-4 text-center">Phân Bổ Thực Phẩm Theo Khuyến Nghị</h3>
+                        <div class="chart-container">
+                            <canvas id="foodDistributionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h4 class="font-bold text-lg text-teal-700 mb-2">Kiểm Soát Gút</h4>
+                            <p class="text-sm text-slate-600">Hạn chế thực phẩm giàu purine như nội tạng, thịt đỏ, một số hải sản để giảm sản sinh acid uric.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h4 class="font-bold text-lg text-teal-700 mb-2">Bảo Vệ Tim Mạch</h4>
+                            <p class="text-sm text-slate-600">Ưu tiên chất béo tốt (dầu ô liu, cá béo), giàu chất xơ, hạn chế chất béo bão hòa và cholesterol.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                             <h4 class="font-bold text-lg text-teal-700 mb-2">Ổn Định Huyết Áp</h4>
+                            <p class="text-sm text-slate-600">Giảm tối đa muối (natri), tăng cường thực phẩm giàu Kali, Magie như rau xanh, chuối, các loại hạt.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lookup-content" class="content-section">
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <h2 class="text-2xl font-bold text-teal-600 mb-4">Tra cứu Nhanh Thực phẩm</h2>
+                    <p class="text-slate-600 leading-relaxed">Đây là công cụ cốt lõi giúp bạn kiểm tra một loại thực phẩm cụ thể nên được tiêu thụ ở mức độ nào. Bạn có thể tìm kiếm theo tên hoặc lọc theo nhóm thực phẩm. Mỗi thực phẩm sẽ được phân loại rõ ràng theo 4 cấp độ màu sắc để bạn dễ dàng nhận biết và đưa ra lựa chọn phù hợp cho bữa ăn hàng ngày.</p>
+                    <div class="mt-4">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm tên thực phẩm (ví dụ: cá hồi, rau muống...)" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition">
+                    </div>
+                    <div id="filter-container" class="mt-4 flex flex-wrap gap-2">
+                    </div>
+                </div>
+                <div id="food-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+                 <div id="no-results" class="text-center py-12 text-slate-500 hidden">
+                    <p class="text-lg">Không tìm thấy kết quả phù hợp.</p>
+                    <p class="text-sm">Vui lòng thử lại với từ khóa khác.</p>
+                </div>
+            </div>
+
+            <div id="principles-content" class="content-section">
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                     <h2 class="text-2xl font-bold text-teal-600 mb-4">Các Nguyên tắc Dinh dưỡng Vàng</h2>
+                     <p class="text-slate-600 leading-relaxed">Tại đây, chúng tôi trình bày chi tiết các nguyên tắc khoa học làm nền tảng cho mọi khuyến nghị. Việc hiểu rõ "tại sao" sẽ giúp bạn tự tin và chủ động hơn trong việc lựa chọn và chế biến thực phẩm. Hãy khám phá các nguyên tắc về kiểm soát Gút, bảo vệ Tim mạch, ổn định Huyết áp và các lưu ý quan trọng khác để xây dựng một lối sống thực sự lành mạnh.</p>
+                </div>
+                <div id="principles-accordion" class="space-y-4">
+                </div>
+            </div>
+
+            <div id="menu-content" class="content-section">
+                 <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                     <h2 class="text-2xl font-bold text-teal-600 mb-4">Thực Đơn Mẫu Tham Khảo</h2>
+                     <p class="text-slate-600 leading-relaxed">Để giúp bạn dễ dàng hình dung việc áp dụng các nguyên tắc vào thực tế, chúng tôi đã xây dựng một thực đơn mẫu cho một ngày. Thực đơn này cân bằng giữa các nhóm chất, đa dạng về thực phẩm và được điều chỉnh để phù hợp với khẩu vị Việt. Bạn có thể sử dụng đây làm nguồn tham khảo để tự xây dựng những bữa ăn lành mạnh và ngon miệng cho riêng mình.</p>
+                </div>
+
+                <div class="space-y-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-xl text-teal-700 mb-4 flex items-center gap-2">☀️ Bữa Sáng</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                           <li><b>Lựa chọn 1:</b> Cháo yến mạch nấu với sữa tươi không đường ít béo, thêm trái cây tươi (táo, dâu tây).</li>
+                           <li><b>Lựa chọn 2:</b> Bún gạo lứt nước dùng rau củ, vài lát ức gà luộc bỏ da, ăn kèm nhiều rau thơm, giá đỗ.</li>
+                           <li><b>Lựa chọn 3:</b> 2 lát bánh mì đen ăn kèm 1 quả trứng luộc và salad dưa chuột, cà chua.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-xl text-teal-700 mb-4 flex items-center gap-2">🏙️ Bữa Trưa</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                           <li>Cơm gạo lứt (1 chén vừa).</li>
+                           <li>Cá diêu hồng hấp xì dầu (pha loãng, ít muối).</li>
+                           <li>Canh bí đao nấu chay hoặc với tôm (vài con).</li>
+                           <li>Salad rau xanh các loại trộn dầu ô liu và giấm táo.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-xl text-teal-700 mb-4 flex items-center gap-2">🌇 Bữa Tối</h3>
+                        <p class="text-sm text-slate-500 mb-3">(Ăn sớm, khẩu phần nhẹ hơn bữa trưa)</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                           <li>Cơm gạo lứt (1/2 chén).</li>
+                           <li>Đậu phụ sốt cà chua (tự làm sốt, ít dầu, ít muối, không đường).</li>
+                           <li>Rau muống luộc chấm nước tương pha loãng với chanh, tỏi.</li>
+                           <li>Tráng miệng bằng 1 quả ổi hoặc vài múi bưởi.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-xl text-teal-700 mb-4 flex items-center gap-2"> snacking Bữa Phụ (nếu cần)</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                           <li>1 hộp sữa chua không đường ít béo.</li>
+                           <li>Một nắm nhỏ các loại hạt không muối (hạnh nhân, óc chó).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="add-food-content" class="content-section">
+                <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <h2 class="text-2xl font-bold text-teal-600 mb-4">Thêm Thực Phẩm Mới</h2>
+                    <p class="text-slate-600 leading-relaxed mb-6">Vui lòng điền thông tin chi tiết về thực phẩm mới cần thêm vào hệ thống.</p>
+                    
+                    <form id="addFoodForm" class="space-y-4">
+                        <div>
+                            <label for="foodName" class="block text-sm font-medium text-slate-700 mb-1">Tên thực phẩm</label>
+                            <input type="text" id="foodName" name="foodName" required
+                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400">
+                        </div>
+
+                        <div>
+                            <label for="foodGroup" class="block text-sm font-medium text-slate-700 mb-1">Nhóm thực phẩm</label>
+                            <select id="foodGroup" name="foodGroup" required
+                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400">
+                                <option value="">Chọn nhóm thực phẩm</option>
+                                <option value="Rau củ">Rau củ</option>
+                                <option value="Trái cây">Trái cây</option>
+                                <option value="Ngũ cốc & Củ">Ngũ cốc & Củ</option>
+                                <option value="Đạm">Đạm</option>
+                                <option value="Chất béo">Chất béo</option>
+                                <option value="Đồ uống & Gia vị">Đồ uống & Gia vị</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="foodLevel" class="block text-sm font-medium text-slate-700 mb-1">Phân loại</label>
+                            <select id="foodLevel" name="foodLevel" required
+                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400">
+                                <option value="">Chọn phân loại</option>
+                                <option value="1">Nên ăn</option>
+                                <option value="2">Ăn vừa</option>
+                                <option value="3">Ăn hạn chế</option>
+                                <option value="4">Cấm ăn</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="foodReason" class="block text-sm font-medium text-slate-700 mb-1">Lý do</label>
+                            <textarea id="foodReason" name="foodReason" required rows="3"
+                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+                                placeholder="Nhập lý do phân loại thực phẩm này..."></textarea>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-teal-600 text-white py-3 px-6 rounded-lg hover:bg-teal-700 transition duration-200">
+                            Thêm thực phẩm
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const foodData = [
+                { name: 'Cải ngọt', group: 'Rau củ', level: 1, reason: 'Ít purine; giàu vitamin K, C, chất xơ, kali. Tốt cho tim, huyết áp.' },
+                { name: 'Rau muống', group: 'Rau củ', level: 1, reason: 'Ít purine; giàu chất xơ, vitamin.' },
+                { name: 'Bí đao', group: 'Rau củ', level: 1, reason: 'Ít purine; tính mát, giàu nước, ít calo, kali.' },
+                { name: 'Dưa chuột', group: 'Rau củ', level: 1, reason: 'Ít purine; giàu nước, vitamin K, kali.' },
+                { name: 'Cà rốt', group: 'Rau củ', level: 1, reason: 'Ít purine; giàu beta-carotene, chất xơ, kali.' },
+                { name: 'Súp lơ xanh', group: 'Rau củ', level: 1, reason: 'Ít purine; giàu vitamin C, K, chất xơ, sulforaphane. Tốt cho tim.' },
+                { name: 'Cà chua', group: 'Rau củ', level: 1, reason: 'Ít purine; giàu lycopene, vitamin C, kali. Tốt cho tim, huyết áp.' },
+                { name: 'Khoai lang', group: 'Ngũ cốc & Củ', level: 1, reason: 'Ít purine; giàu tinh bột phức, chất xơ, kali.' },
+                { name: 'Gạo lứt', group: 'Ngũ cốc & Củ', level: 1, reason: 'Purine trung bình nhưng lợi ích từ chất xơ, magie vượt trội. Tốt cho tim, huyết áp.' },
+                { name: 'Yến mạch', group: 'Ngũ cốc & Củ', level: 1, reason: 'Giàu chất xơ hòa tan (beta-glucan) giúp giảm cholesterol. Tốt cho tim, huyết áp.' },
+                { name: 'Ổi', group: 'Trái cây', level: 1, reason: 'Ít purine; rất giàu vitamin C, chất xơ. Giúp giảm axit uric.' },
+                { name: 'Cam, Bưởi', group: 'Trái cây', level: 1, reason: 'Ít purine; giàu vitamin C, kali, chất xơ. Tốt cho tim, huyết áp.' },
+                { name: 'Dâu tây', group: 'Trái cây', level: 1, reason: 'Ít purine; giàu vitamin C, chất chống oxy hóa. Tốt cho tim, giảm viêm.' },
+                { name: 'Chuối', group: 'Trái cây', level: 1, reason: 'Ít purine; rất giàu kali, tốt cho huyết áp.' },
+                { name: 'Táo', group: 'Trái cây', level: 1, reason: 'Ít purine; giàu chất xơ (pectin), vitamin C. Tốt cho tim.' },
+                { name: 'Trứng (Lòng trắng)', group: 'Đạm', level: 1, reason: 'Gần như không có purine. Nguồn protein chất lượng cao.' },
+                { name: 'Sữa tươi không đường ít béo', group: 'Đạm', level: 1, reason: 'Ít purine; giúp giảm axit uric. Giàu canxi, kali.' },
+                { name: 'Sữa chua không đường', group: 'Đạm', level: 1, reason: 'Tương tự sữa tươi. Chứa probiotics tốt cho tiêu hóa.' },
+                { name: 'Đậu phụ (Tofu)', group: 'Đạm', level: 2, reason: 'Purine thấp. Nguồn protein thực vật tốt, dễ tiêu hóa.' },
+                { name: 'Dầu ô liu', group: 'Chất béo', level: 1, reason: 'Không purine; giàu chất béo không bão hòa đơn, chất chống oxy hóa. Tốt cho tim.' },
+                { name: 'Nước lọc', group: 'Đồ uống & Gia vị', level: 1, reason: 'Cần thiết cho mọi hoạt động, giúp thải axit uric.' },
+                { name: 'Các loại rau thơm', group: 'Đồ uống & Gia vị', level: 1, reason: 'Ít purine; tăng hương vị tự nhiên, giúp giảm muối.' },
+
+                { name: 'Nấm (các loại tươi)', group: 'Rau củ', level: 2, reason: 'Purine trung bình. Cung cấp protein thực vật, chất xơ. Ăn lượng vừa phải.' },
+                { name: 'Măng tây', group: 'Rau củ', level: 2, reason: 'Purine trung bình. Giàu vitamin K, folate. Ăn lượng vừa phải.' },
+                { name: 'Giá đỗ', group: 'Rau củ', level: 2, reason: 'Purine trung bình. Giàu vitamin C, K. Ăn lượng vừa phải.' },
+                { name: 'Xoài chín', group: 'Trái cây', level: 2, reason: 'Ít purine nhưng đường tự nhiên cao. Cung cấp vitamin A, C.' },
+                { name: 'Nho ngọt', group: 'Trái cây', level: 2, reason: 'Ít purine nhưng đường tự nhiên cao. Resveratrol trong vỏ tốt cho tim.' },
+                { name: 'Gạo trắng (cơm)', group: 'Ngũ cốc & Củ', level: 2, reason: 'Ít purine nhưng ít chất xơ hơn gạo lứt. Cần kiểm soát khẩu phần.' },
+                { name: 'Thịt gà (bỏ da)', group: 'Đạm', level: 2, reason: 'Purine trung bình. Nguồn protein nạc. Nên ăn khoảng 85-150g/ngày.' },
+                { name: 'Thịt vịt (bỏ da, nạc)', group: 'Đạm', level: 2, reason: 'Purine thấp hơn gà, bò. Nguồn protein nạc. Ăn lượng vừa phải.' },
+                { name: 'Cá rô đồng, cá lóc', group: 'Đạm', level: 2, reason: 'Purine thấp-trung bình. Nguồn protein tốt, ít béo. Ăn 2-3 lần/tuần.' },
+                { name: 'Cá hồi', group: 'Đạm', level: 2, reason: 'Purine trung bình. Rất giàu Omega-3 tốt cho tim. Cần cân bằng lợi ích và nguy cơ, ăn 1-2 lần/tuần, ~100g/lần.' },
+                { name: 'Đậu xanh, đậu đỏ', group: 'Đạm', level: 2, reason: 'Purine thấp-trung bình. Giàu protein thực vật, chất xơ. Purine thực vật ít đáng ngại hơn.' },
+                { name: 'Hạnh nhân, Óc chó', group: 'Chất béo', level: 2, reason: 'Ít purine. Giàu chất béo tốt, vitamin E, magie. Chọn loại không muối. Ăn 1 nắm nhỏ/ngày.' },
+                { name: 'Quả bơ', group: 'Chất béo', level: 2, reason: 'Ít purine. Giàu chất béo đơn không bão hòa, kali. Tốt cho tim, huyết áp.' },
+                { name: 'Cà phê không đường', group: 'Đồ uống & Gia vị', level: 2, reason: 'Có thể có lợi nhưng cần cẩn trọng với người nhạy cảm caffeine, tim mạch. Uống 1 ly/ngày.' },
+                
+                { name: 'Thịt bò nạc', group: 'Đạm', level: 3, reason: 'Purine cao. Chứa chất béo bão hòa. Ăn rất hạn chế, không quá 70g/lần, 1-2 lần/tháng.' },
+                { name: 'Thịt lợn nạc', group: 'Đạm', level: 3, reason: 'Purine cao. Chứa chất béo bão hòa. Hạn chế tương tự thịt bò.' },
+                { name: 'Tôm, Cua', group: 'Đạm', level: 3, reason: 'Purine trung bình-cao. Chứa cholesterol. Ăn lượng nhỏ, không thường xuyên.' },
+                { name: 'Mực ống', group: 'Đạm', level: 3, reason: 'Purine trung bình-cao. Chứa cholesterol. Ăn hạn chế.' },
+                { name: 'Trái cây sấy khô', group: 'Trái cây', level: 3, reason: 'Cô đặc đường và purine. Hạn chế tối đa.' },
+                { name: 'Nước mắm', group: 'Đồ uống & Gia vị', level: 3, reason: 'Hàm lượng natri và purine rất cao. Dùng tối thiểu hoặc pha loãng.' },
+                { name: 'Xì dầu (Nước tương)', group: 'Đồ uống & Gia vị', level: 3, reason: 'Hàm lượng natri rất cao. Dùng tối thiểu.' },
+                { name: 'Đường, Mật ong', group: 'Đồ uống & Gia vị', level: 3, reason: 'Fructose làm tăng axit uric, không tốt cho cân nặng, tim mạch. Hạn chế tối đa.' },
+                { name: 'Chè các loại', group: 'Đồ uống & Gia vị', level: 3, reason: 'Thường chứa rất nhiều đường. Hạn chế tối đa.' },
+
+                { name: 'Gan (lợn, bò, gà)', group: 'Đạm', level: 4, reason: 'Purine và cholesterol rất cao. Tuyệt đối tránh.' },
+                { name: 'Thận, Óc, Tim, Lòng', group: 'Đạm', level: 4, reason: 'Purine và cholesterol rất cao. Tuyệt đối tránh.' },
+                { name: 'Xúc xích, Lạp xưởng', group: 'Đạm', level: 4, reason: 'Nhiều purine, chất béo bão hòa, natri, chất bảo quản. Tuyệt đối tránh.' },
+                { name: 'Pate gan', group: 'Đạm', level: 4, reason: 'Purine và cholesterol rất cao từ gan. Tuyệt đối tránh.' },
+                { name: 'Cá mòi, Cá trích, Cá cơm', group: 'Đạm', level: 4, reason: 'Purine rất cao. Tuyệt đối tránh.' },
+                { name: 'Mỡ động vật', group: 'Chất béo', level: 4, reason: 'Nhiều chất béo bão hòa, cholesterol. Tuyệt đối tránh.' },
+                { name: 'Da động vật (gà, vịt)', group: 'Chất béo', level: 4, reason: 'Nhiều chất béo bão hòa, cholesterol. Tuyệt đối tránh.' },
+                { name: 'Rượu, Bia', group: 'Đồ uống & Gia vị', level: 4, reason: 'Làm tăng axit uric mạnh, cản trở đào thải. Tuyệt đối tránh.' },
+                { name: 'Nước ngọt có ga', group: 'Đồ uống & Gia vị', level: 4, reason: 'Nhiều đường fructose, calo rỗng, làm tăng axit uric. Tuyệt đối tránh.' },
+                { name: 'Nước hầm xương/thịt', group: 'Đồ uống & Gia vị', level: 4, reason: 'Rất nhiều purine hòa tan. Tuyệt đối tránh, đặc biệt trong các món phở, bún.' },
+                { name: 'Mắm tôm, Mắm ruốc', group: 'Đồ uống & Gia vị', level: 4, reason: 'Hàm lượng muối và purine cực kỳ cao. Tuyệt đối tránh.' }
+            ];
+
+            const principlesData = [
+                { title: 'Kiểm soát Gút (Acid Uric)', content: 'Nguyên nhân chính của Gút là tăng acid uric trong máu, hình thành từ purine trong thực phẩm. Do đó, cần hạn chế tối đa thực phẩm nhóm 4 (purine rất cao) như nội tạng động vật, cá mòi, bia. Hạn chế thực phẩm nhóm 3 (purine cao) như thịt đỏ. Ưu tiên đạm từ trứng, sữa, đậu phụ và thịt gia cầm trắng (bỏ da) ở mức độ vừa phải. Purine từ thực vật (nấm, đậu, măng tây) ít đáng ngại hơn nhưng cũng nên dùng vừa phải. Uống nhiều nước giúp đào thải acid uric.' },
+                { title: 'Bảo vệ Tim Mạch', content: 'Chế độ ăn tốt cho tim mạch tập trung vào việc lựa chọn chất béo thông minh và tăng cường chất xơ. Hãy ưu tiên chất béo không bão hòa từ dầu ô liu, quả bơ, các loại hạt và cá béo (cá hồi, cá thu). Các loại cá này giàu Omega-3, giúp giảm viêm và triglyceride. Hạn chế tối đa chất béo bão hòa từ mỡ, da động vật, thịt đỏ. Loại bỏ hoàn toàn chất béo trans từ thực phẩm chế biến sẵn, đồ chiên rán. Ăn nhiều rau xanh, trái cây và ngũ cốc nguyên hạt để bổ sung chất xơ, giúp giảm cholesterol xấu (LDL).' },
+                { title: 'Ổn định Huyết Áp (Nguyên tắc DASH)', content: 'Chế độ ăn DASH (Dietary Approaches to Stop Hypertension) là phương pháp hiệu quả. Cốt lõi là GIẢM NATRI (muối) xuống dưới 2,300mg/ngày (khoảng 1 muỗng cà phê muối), lý tưởng là dưới 1,500mg. Tránh thực phẩm chế biến sẵn, đồ hộp, các loại mắm mặn. Đồng thời TĂNG KALI (có trong chuối, khoai lang, rau lá xanh), MAGIE (các loại hạt, ngũ cốc nguyên hạt) và CANXI (sữa ít béo, đậu phụ) để giúp mạch máu thư giãn và cân bằng tác dụng của natri.' },
+                { title: 'Những Lưu ý Chung Quan trọng', content: '<b>Uống đủ nước:</b> Tối thiểu 2 lít/ngày. <b>Duy trì cân nặng:</b> Giảm cân từ từ nếu thừa cân, tránh giảm cân quá nhanh. <b>Chế biến lành mạnh:</b> Ưu tiên luộc, hấp, kho nhạt; tránh chiên, nướng cháy. <b>Lối sống:</b> Tuyệt đối không hút thuốc lá, không uống rượu bia và tăng cường vận động thể lực phù hợp.' }
+            ];
+
+            const levelInfo = {
+                1: { text: 'Nên ăn', className: 'level-1', textColor: 'level-1-text' },
+                2: { text: 'Ăn vừa phải', className: 'level-2', textColor: 'level-2-text' },
+                3: { text: 'Ăn hạn chế', className: 'level-3', textColor: 'level-3-text' },
+                4: { text: 'Cấm ăn', className: 'level-4', textColor: 'level-4-text' }
+            };
+
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.content-section');
+            const foodListContainer = document.getElementById('food-list');
+            const searchInput = document.getElementById('searchInput');
+            const filterContainer = document.getElementById('filter-container');
+            const noResultsDiv = document.getElementById('no-results');
+
+            let activeTab = 'overview';
+            let activeFilter = 'Tất cả';
+
+            function switchTab(tabName) {
+                activeTab = tabName;
+                tabs.forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                });
+                contents.forEach(content => {
+                    content.classList.toggle('active', content.id === `${tabName}-content`);
+                });
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+
+            function renderFoodList(filteredData) {
+                foodListContainer.innerHTML = '';
+                if (filteredData.length === 0) {
+                    noResultsDiv.classList.remove('hidden');
+                } else {
+                    noResultsDiv.classList.add('hidden');
+                }
+                filteredData.forEach(food => {
+                    const info = levelInfo[food.level];
+                    const card = document.createElement('div');
+                    card.className = `food-card p-4 rounded-lg shadow-sm ${info.className}`;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-lg font-semibold text-slate-800 pr-2">${food.name}</h3>
+                            <span class="text-xs font-bold ${info.textColor} uppercase tracking-wider">${info.text}</span>
+                        </div>
+                        <p class="text-sm text-slate-600 mt-2">${food.reason}</p>
+                    `;
+                    foodListContainer.appendChild(card);
+                });
+            }
+            
+            function filterAndRender() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                let filteredData = foodData;
+
+                if (activeFilter !== 'Tất cả') {
+                    filteredData = filteredData.filter(food => food.group === activeFilter);
+                }
+
+                if (searchTerm) {
+                    filteredData = filteredData.filter(food => food.name.toLowerCase().includes(searchTerm));
+                }
+                
+                renderFoodList(filteredData);
+            }
+            
+            function createFilters() {
+                const groups = ['Tất cả', ...new Set(foodData.map(f => f.group))];
+                groups.forEach(group => {
+                    const button = document.createElement('button');
+                    button.textContent = group;
+                    button.dataset.group = group;
+                    button.className = 'filter-btn px-3 py-1.5 text-sm rounded-full transition';
+                    if (group === 'Tất cả') {
+                         button.className += ' bg-teal-600 text-white';
+                    } else {
+                         button.className += ' bg-slate-200 text-slate-700 hover:bg-slate-300';
+                    }
+                    button.addEventListener('click', () => {
+                        activeFilter = group;
+                        document.querySelectorAll('.filter-btn').forEach(btn => {
+                            btn.classList.remove('bg-teal-600', 'text-white');
+                            btn.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
+                        });
+                        button.classList.add('bg-teal-600', 'text-white');
+                        button.classList.remove('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
+                        filterAndRender();
+                    });
+                    filterContainer.appendChild(button);
+                });
+            }
+
+            searchInput.addEventListener('input', filterAndRender);
+            
+            function createPrinciplesAccordion() {
+                const accordionContainer = document.getElementById('principles-accordion');
+                principlesData.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white rounded-xl shadow-sm overflow-hidden';
+                    div.innerHTML = `
+                        <button class="w-full flex justify-between items-center text-left p-5 accordion-header hover:bg-slate-50 transition">
+                            <h3 class="text-lg font-semibold text-teal-700">${item.title}</h3>
+                            <span class="accordion-icon text-teal-500 transform transition-transform">▼</span>
+                        </button>
+                        <div class="accordion-content p-5 pt-0 text-slate-600 leading-relaxed" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease-out;">
+                            <p>${item.content}</p>
+                        </div>
+                    `;
+                    accordionContainer.appendChild(div);
+                });
+
+                accordionContainer.addEventListener('click', function(e) {
+                    const header = e.target.closest('.accordion-header');
+                    if (!header) return;
+                    
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('.accordion-icon');
+                    const isOpen = content.style.maxHeight !== '0px';
+
+                    // Optional: Close all others
+                    // this.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = '0px');
+                    // this.querySelectorAll('.accordion-icon').forEach(i => i.style.transform = 'rotate(0deg)');
+
+                    if (isOpen) {
+                        content.style.maxHeight = '0px';
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            }
+
+            function createOverviewChart() {
+                const ctx = document.getElementById('foodDistributionChart').getContext('2d');
+                const levelCounts = foodData.reduce((acc, food) => {
+                    acc[food.level] = (acc[food.level] || 0) + 1;
+                    return acc;
+                }, {});
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Nên ăn', 'Ăn vừa phải', 'Ăn hạn chế', 'Cấm ăn'],
+                        datasets: [{
+                            label: 'Số lượng thực phẩm',
+                            data: [levelCounts[1], levelCounts[2], levelCounts[3], levelCounts[4]],
+                            backgroundColor: [
+                                'rgba(52, 211, 153, 0.8)',
+                                'rgba(250, 204, 21, 0.8)',
+                                'rgba(251, 146, 60, 0.8)',
+                                'rgba(248, 113, 113, 0.8)'
+                            ],
+                            borderColor: [
+                                '#34d399',
+                                '#facc15',
+                                '#fb923c',
+                                '#f87171'
+                            ],
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 15,
+                                    padding: 20
+                                }
+                            },
+                             tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + ' loại';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Initial setup
+            switchTab('overview');
+            renderFoodList(foodData);
+            createFilters();
+            createPrinciplesAccordion();
+            createOverviewChart();
+
+            // Add Food Form Handler
+            document.getElementById('addFoodForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const newFood = {
+                    name: document.getElementById('foodName').value,
+                    group: document.getElementById('foodGroup').value,
+                    level: parseInt(document.getElementById('foodLevel').value),
+                    reason: document.getElementById('foodReason').value
+                };
+
+                // Add to foodData array
+                foodData.push(newFood);
+
+                // Clear form
+                this.reset();
+
+                // Show success message
+                alert('Thêm thực phẩm thành công!');
+
+                // Refresh food list if on lookup tab
+                if (document.getElementById('lookup-content').classList.contains('active')) {
+                    renderFoodList();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
