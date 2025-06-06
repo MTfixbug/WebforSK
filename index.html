@@ -4,8 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cẩm Nang Dinh Dưỡng: Gút - Tim Mạch - Huyết Áp</title>
+    <!-- Production version of Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {}
+            },
+            plugins: [
+                require('@tailwindcss/forms'),
+                require('@tailwindcss/typography'),
+                require('@tailwindcss/aspect-ratio')
+            ]
+        }
+    </script>
+    <!-- Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -85,29 +99,82 @@
         <main>
             <div id="overview-content" class="content-section">
                 <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
-                     <h2 class="text-2xl font-bold text-teal-600 mb-4">Chào mừng bạn đến với Cẩm nang Dinh dưỡng Tương tác</h2>
-                     <p class="text-slate-600 leading-relaxed">Phần tổng quan này cung cấp cho bạn một cái nhìn bao quát về các nguyên tắc dinh dưỡng cốt lõi và sự phân bổ các nhóm thực phẩm được khuyến nghị. Mục tiêu là giúp bạn nhanh chóng nắm bắt triết lý ăn uống lành mạnh để quản lý đồng thời cả ba tình trạng: Gút, Tim mạch và Cao huyết áp. Hãy bắt đầu hành trình chăm sóc sức khỏe của bạn từ đây.</p>
+                    <h2 class="text-2xl font-bold text-teal-600 mb-4">Chào mừng bạn đến với Cẩm nang Dinh dưỡng Tương tác</h2>
+                    <p class="text-slate-600 leading-relaxed">Phần tổng quan này cung cấp cho bạn một cái nhìn bao quát về các nguyên tắc dinh dưỡng cốt lõi và sự phân bổ các nhóm thực phẩm được khuyến nghị. Mục tiêu là giúp bạn nhanh chóng nắm bắt triết lý ăn uống lành mạnh để quản lý đồng thời cả ba tình trạng: Gút, Tim mạch và Cao huyết áp.</p>
                 </div>
 
-                <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Biểu đồ phân bổ -->
                     <div class="bg-white p-6 rounded-xl shadow-sm">
                         <h3 class="text-xl font-semibold mb-4 text-center">Phân Bổ Thực Phẩm Theo Khuyến Nghị</h3>
                         <div class="chart-container">
                             <canvas id="foodDistributionChart"></canvas>
                         </div>
                     </div>
+
+                    <!-- Thống kê nhanh -->
                     <div class="space-y-4">
-                        <div class="bg-white p-6 rounded-xl shadow-sm">
-                            <h4 class="font-bold text-lg text-teal-700 mb-2">Kiểm Soát Gút</h4>
-                            <p class="text-sm text-slate-600">Hạn chế thực phẩm giàu purine như nội tạng, thịt đỏ, một số hải sản để giảm sản sinh acid uric.</p>
+                        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
+                                    <span class="text-2xl">🦶</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-teal-700">Kiểm Soát Gút</h4>
+                                    <p class="text-sm text-slate-600">Hạn chế thực phẩm giàu purine để giảm sản sinh acid uric.</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-slate-50 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium">Thực phẩm nên ăn</span>
+                                    <span class="text-teal-600 font-bold" id="level1Count">0</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="bg-teal-500 h-2 rounded-full" id="level1Bar"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm">
-                            <h4 class="font-bold text-lg text-teal-700 mb-2">Bảo Vệ Tim Mạch</h4>
-                            <p class="text-sm text-slate-600">Ưu tiên chất béo tốt (dầu ô liu, cá béo), giàu chất xơ, hạn chế chất béo bão hòa và cholesterol.</p>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span class="text-2xl">❤️</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-blue-700">Bảo Vệ Tim Mạch</h4>
+                                    <p class="text-sm text-slate-600">Ưu tiên chất béo tốt và thực phẩm giàu chất xơ.</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-slate-50 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium">Thực phẩm nên hạn chế</span>
+                                    <span class="text-blue-600 font-bold" id="level3Count">0</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="bg-blue-500 h-2 rounded-full" id="level3Bar"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm">
-                             <h4 class="font-bold text-lg text-teal-700 mb-2">Ổn Định Huyết Áp</h4>
-                            <p class="text-sm text-slate-600">Giảm tối đa muối (natri), tăng cường thực phẩm giàu Kali, Magie như rau xanh, chuối, các loại hạt.</p>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <span class="text-2xl">💪</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-purple-700">Ổn Định Huyết Áp</h4>
+                                    <p class="text-sm text-slate-600">Giảm muối, tăng cường Kali và Magie.</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-slate-50 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium">Thực phẩm cấm ăn</span>
+                                    <span class="text-purple-600 font-bold" id="level4Count">0</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="bg-purple-500 h-2 rounded-full" id="level4Bar"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -116,16 +183,73 @@
             <div id="lookup-content" class="content-section">
                 <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
                     <h2 class="text-2xl font-bold text-teal-600 mb-4">Tra cứu Nhanh Thực phẩm</h2>
-                    <p class="text-slate-600 leading-relaxed">Đây là công cụ cốt lõi giúp bạn kiểm tra một loại thực phẩm cụ thể nên được tiêu thụ ở mức độ nào. Bạn có thể tìm kiếm theo tên hoặc lọc theo nhóm thực phẩm. Mỗi thực phẩm sẽ được phân loại rõ ràng theo 4 cấp độ màu sắc để bạn dễ dàng nhận biết và đưa ra lựa chọn phù hợp cho bữa ăn hàng ngày.</p>
-                    <div class="mt-4">
-                        <input type="text" id="searchInput" placeholder="Tìm kiếm tên thực phẩm (ví dụ: cá hồi, rau muống...)" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition">
+                    <p class="text-slate-600 leading-relaxed mb-6">Đây là công cụ cốt lõi giúp bạn kiểm tra một loại thực phẩm cụ thể nên được tiêu thụ ở mức độ nào. Bạn có thể tìm kiếm theo tên hoặc lọc theo nhóm thực phẩm. Mỗi thực phẩm sẽ được phân loại rõ ràng theo 4 cấp độ màu sắc để bạn dễ dàng nhận biết và đưa ra lựa chọn phù hợp cho bữa ăn hàng ngày.</p>
+                    
+                    <!-- Advanced Search Form -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Tìm kiếm tên thực phẩm..." 
+                                class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition">
+                            <div id="searchSuggestions" class="absolute z-10 w-full bg-white border border-slate-200 rounded-lg shadow-lg mt-1 hidden"></div>
+                        </div>
+                        
+                        <div>
+                            <select id="groupFilter" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition">
+                                <option value="">Tất cả nhóm thực phẩm</option>
+                                <option value="Rau củ">Rau củ</option>
+                                <option value="Trái cây">Trái cây</option>
+                                <option value="Ngũ cốc & Củ">Ngũ cốc & Củ</option>
+                                <option value="Đạm">Đạm</option>
+                                <option value="Chất béo">Chất béo</option>
+                                <option value="Đồ uống & Gia vị">Đồ uống & Gia vị</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <select id="levelFilter" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition">
+                                <option value="">Tất cả mức độ</option>
+                                <option value="1">Nên ăn</option>
+                                <option value="2">Ăn vừa phải</option>
+                                <option value="3">Ăn hạn chế</option>
+                                <option value="4">Cấm ăn</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <select id="sortBy" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition">
+                                <option value="name">Sắp xếp theo tên</option>
+                                <option value="group">Sắp xếp theo nhóm</option>
+                                <option value="level">Sắp xếp theo mức độ</option>
+                            </select>
+                        </div>
                     </div>
-                    <div id="filter-container" class="mt-4 flex flex-wrap gap-2">
+
+                    <!-- Search Stats -->
+                    <div id="searchStats" class="bg-slate-50 p-4 rounded-lg mb-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-600">Tìm thấy</span>
+                                <span id="resultCount" class="font-bold text-teal-600 text-lg">0</span>
+                                <span class="text-slate-600">kết quả</span>
+                            </div>
+                            <div id="filterSummary" class="text-sm text-slate-500"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Filters -->
+                    <div id="quickFilters" class="flex flex-wrap gap-2 mb-4">
+                        <button class="quick-filter px-3 py-1.5 text-sm rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition" data-filter="all">Tất cả</button>
+                        <button class="quick-filter px-3 py-1.5 text-sm rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition" data-filter="level1">Nên ăn</button>
+                        <button class="quick-filter px-3 py-1.5 text-sm rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition" data-filter="level2">Ăn vừa phải</button>
+                        <button class="quick-filter px-3 py-1.5 text-sm rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition" data-filter="level3">Ăn hạn chế</button>
+                        <button class="quick-filter px-3 py-1.5 text-sm rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition" data-filter="level4">Cấm ăn</button>
                     </div>
                 </div>
+
                 <div id="food-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 </div>
-                 <div id="no-results" class="text-center py-12 text-slate-500 hidden">
+                
+                <div id="no-results" class="text-center py-12 text-slate-500 hidden">
                     <p class="text-lg">Không tìm thấy kết quả phù hợp.</p>
                     <p class="text-sm">Vui lòng thử lại với từ khóa khác.</p>
                 </div>
@@ -133,10 +257,127 @@
 
             <div id="principles-content" class="content-section">
                 <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
-                     <h2 class="text-2xl font-bold text-teal-600 mb-4">Các Nguyên tắc Dinh dưỡng Vàng</h2>
-                     <p class="text-slate-600 leading-relaxed">Tại đây, chúng tôi trình bày chi tiết các nguyên tắc khoa học làm nền tảng cho mọi khuyến nghị. Việc hiểu rõ "tại sao" sẽ giúp bạn tự tin và chủ động hơn trong việc lựa chọn và chế biến thực phẩm. Hãy khám phá các nguyên tắc về kiểm soát Gút, bảo vệ Tim mạch, ổn định Huyết áp và các lưu ý quan trọng khác để xây dựng một lối sống thực sự lành mạnh.</p>
+                    <h2 class="text-2xl font-bold text-teal-600 mb-4">Các Nguyên tắc Dinh dưỡng Vàng</h2>
+                    <p class="text-slate-600 leading-relaxed">Tại đây, chúng tôi trình bày chi tiết các nguyên tắc khoa học làm nền tảng cho mọi khuyến nghị. Việc hiểu rõ "tại sao" sẽ giúp bạn tự tin và chủ động hơn trong việc lựa chọn và chế biến thực phẩm.</p>
                 </div>
-                <div id="principles-accordion" class="space-y-4">
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Nguyên tắc Gút -->
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
+                                    <span class="text-2xl">🦶</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-teal-700">Kiểm soát Gút</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="p-4 bg-slate-50 rounded-lg">
+                                    <h4 class="font-semibold text-slate-800 mb-2">Nguyên nhân</h4>
+                                    <p class="text-sm text-slate-600">Tăng acid uric trong máu, hình thành từ purine trong thực phẩm. Do đó, cần hạn chế tối đa thực phẩm nhóm 4 (purine rất cao) như nội tạng động vật, cá mòi, bia. Hạn chế thực phẩm nhóm 3 (purine cao) như thịt đỏ. Ưu tiên đạm từ trứng, sữa, đậu phụ và thịt gia cầm trắng (bỏ da) ở mức độ vừa phải. Purine từ thực vật (nấm, đậu, măng tây) ít đáng ngại hơn nhưng cũng nên dùng vừa phải. Uống nhiều nước giúp đào thải acid uric.</p>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-lg">
+                                    <h4 class="font-semibold text-slate-800 mb-2">Giải pháp</h4>
+                                    <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                        <li>Hạn chế thực phẩm nhóm 4 (purine rất cao)</li>
+                                        <li>Hạn chế thực phẩm nhóm 3 (purine cao)</li>
+                                        <li>Ưu tiên đạm từ trứng, sữa, đậu phụ</li>
+                                        <li>Uống nhiều nước để đào thải acid uric</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nguyên tắc Tim mạch -->
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span class="text-2xl">❤️</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-blue-700">Bảo vệ Tim Mạch</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="p-4 bg-slate-50 rounded-lg">
+                                    <h4 class="font-semibold text-slate-800 mb-2">Chất béo tốt</h4>
+                                    <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                        <li>Dầu ô liu, quả bơ</li>
+                                        <li>Các loại hạt</li>
+                                        <li>Cá béo (cá hồi, cá thu)</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-lg">
+                                    <h4 class="font-semibold text-slate-800 mb-2">Cần tránh</h4>
+                                    <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                        <li>Chất béo bão hòa từ mỡ, da động vật</li>
+                                        <li>Chất béo trans từ đồ chiên rán</li>
+                                        <li>Thực phẩm chế biến sẵn</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nguyên tắc Huyết áp -->
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <span class="text-2xl">💪</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-purple-700">Ổn Định Huyết Áp</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="p-4 bg-slate-50 rounded-lg">
+                                    <h4 class="font-semibold text-slate-800 mb-2">Giảm Natri</h4>
+                                    <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                        <li>Dưới 2,300mg/ngày (1 muỗng cà phê muối)</li>
+                                        <li>Tránh thực phẩm chế biến sẵn</li>
+                                        <li>Hạn chế đồ hộp, mắm mặn</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-lg">
+                                    <h4 class="font-semibold text-slate-800 mb-2">Tăng cường</h4>
+                                    <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                        <li>Kali: chuối, khoai lang, rau lá xanh</li>
+                                        <li>Magie: các loại hạt, ngũ cốc nguyên hạt</li>
+                                        <li>Canxi: sữa ít béo, đậu phụ</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lưu ý chung -->
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                                    <span class="text-2xl">📝</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-amber-700">Lưu Ý Chung</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="p-4 bg-slate-50 rounded-lg">
+                                    <h4 class="font-semibold text-slate-800 mb-2">Thói quen tốt</h4>
+                                    <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                        <li>Uống đủ nước (2 lít/ngày)</li>
+                                        <li>Duy trì cân nặng hợp lý</li>
+                                        <li>Chế biến lành mạnh: luộc, hấp, kho nhạt</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-lg">
+                                    <h4 class="font-semibold text-slate-800 mb-2">Cần tránh</h4>
+                                    <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                        <li>Không hút thuốc lá</li>
+                                        <li>Không uống rượu bia</li>
+                                        <li>Tránh giảm cân quá nhanh</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -433,51 +674,156 @@
                 });
             }
             
+            function normalizeText(text) {
+                return text.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/đ/g, 'd')
+                    .replace(/Đ/g, 'D');
+            }
+
             function filterAndRender() {
-                const searchTerm = searchInput.value.toLowerCase().trim();
+                const searchTerm = normalizeText(searchInput.value.trim());
+                const groupFilter = document.getElementById('groupFilter').value;
+                const levelFilter = document.getElementById('levelFilter').value;
+                const sortBy = document.getElementById('sortBy').value;
+                
                 let filteredData = foodData;
 
-                if (activeFilter !== 'Tất cả') {
-                    filteredData = filteredData.filter(food => food.group === activeFilter);
+                // Lọc theo nhóm
+                if (groupFilter) {
+                    filteredData = filteredData.filter(food => food.group === groupFilter);
                 }
 
+                // Lọc theo mức độ
+                if (levelFilter) {
+                    filteredData = filteredData.filter(food => food.level.toString() === levelFilter);
+                }
+
+                // Tìm kiếm thông minh
                 if (searchTerm) {
-                    filteredData = filteredData.filter(food => food.name.toLowerCase().includes(searchTerm));
+                    filteredData = filteredData.filter(food => 
+                        normalizeText(food.name).includes(searchTerm) ||
+                        normalizeText(food.reason).includes(searchTerm)
+                    );
+                }
+
+                // Sắp xếp kết quả
+                filteredData.sort((a, b) => {
+                    switch(sortBy) {
+                        case 'name':
+                            return a.name.localeCompare(b.name);
+                        case 'group':
+                            return a.group.localeCompare(b.group);
+                        case 'level':
+                            return a.level - b.level;
+                        default:
+                            return 0;
+                    }
+                });
+
+                // Cập nhật số lượng kết quả và thông tin lọc
+                document.getElementById('resultCount').textContent = filteredData.length;
+                
+                // Cập nhật thông tin bộ lọc đang áp dụng
+                const filterSummary = [];
+                if (groupFilter) {
+                    filterSummary.push(`Nhóm: ${groupFilter}`);
+                }
+                if (levelFilter) {
+                    const levelText = {
+                        '1': 'Nên ăn',
+                        '2': 'Ăn vừa phải',
+                        '3': 'Ăn hạn chế',
+                        '4': 'Cấm ăn'
+                    }[levelFilter];
+                    filterSummary.push(`Mức độ: ${levelText}`);
+                }
+                if (searchTerm) {
+                    filterSummary.push(`Từ khóa: "${searchInput.value}"`);
                 }
                 
+                document.getElementById('filterSummary').textContent = 
+                    filterSummary.length > 0 ? `Đang lọc theo: ${filterSummary.join(' | ')}` : '';
+
+                // Hiển thị kết quả
                 renderFoodList(filteredData);
             }
-            
-            function createFilters() {
-                const groups = ['Tất cả', ...new Set(foodData.map(f => f.group))];
-                groups.forEach(group => {
-                    const button = document.createElement('button');
-                    button.textContent = group;
-                    button.dataset.group = group;
-                    button.className = 'filter-btn px-3 py-1.5 text-sm rounded-full transition';
-                    if (group === 'Tất cả') {
-                         button.className += ' bg-teal-600 text-white';
-                    } else {
-                         button.className += ' bg-slate-200 text-slate-700 hover:bg-slate-300';
-                    }
-                    button.addEventListener('click', () => {
-                        activeFilter = group;
-                        document.querySelectorAll('.filter-btn').forEach(btn => {
-                            btn.classList.remove('bg-teal-600', 'text-white');
-                            btn.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
-                        });
-                        button.classList.add('bg-teal-600', 'text-white');
-                        button.classList.remove('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
-                        filterAndRender();
-                    });
-                    filterContainer.appendChild(button);
-                });
+
+            // Xử lý gợi ý tìm kiếm
+            function showSearchSuggestions() {
+                const searchTerm = normalizeText(searchInput.value.trim());
+                const suggestionsDiv = document.getElementById('searchSuggestions');
+                
+                if (!searchTerm) {
+                    suggestionsDiv.classList.add('hidden');
+                    return;
+                }
+
+                const suggestions = foodData
+                    .filter(food => normalizeText(food.name).includes(searchTerm))
+                    .slice(0, 5);
+
+                if (suggestions.length > 0) {
+                    suggestionsDiv.innerHTML = suggestions
+                        .map(food => `<div class="p-2 hover:bg-slate-100 cursor-pointer">${food.name}</div>`)
+                        .join('');
+                    suggestionsDiv.classList.remove('hidden');
+                } else {
+                    suggestionsDiv.classList.add('hidden');
+                }
             }
 
-            searchInput.addEventListener('input', filterAndRender);
-            
+            // Xử lý click vào gợi ý
+            document.getElementById('searchSuggestions').addEventListener('click', function(e) {
+                if (e.target.tagName === 'DIV') {
+                    searchInput.value = e.target.textContent;
+                    document.getElementById('searchSuggestions').classList.add('hidden');
+                    filterAndRender();
+                }
+            });
+
+            // Xử lý quick filters
+            document.querySelectorAll('.quick-filter').forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.dataset.filter;
+                    document.querySelectorAll('.quick-filter').forEach(btn => {
+                        btn.classList.remove('bg-teal-600', 'text-white');
+                        btn.classList.add('bg-slate-200', 'text-slate-700');
+                    });
+                    this.classList.add('bg-teal-600', 'text-white');
+                    this.classList.remove('bg-slate-200', 'text-slate-700');
+
+                    if (filter === 'all') {
+                        document.getElementById('levelFilter').value = '';
+                    } else {
+                        document.getElementById('levelFilter').value = filter.replace('level', '');
+                    }
+                    filterAndRender();
+                });
+            });
+
+            // Thêm event listeners
+            document.getElementById('searchInput').addEventListener('input', function() {
+                showSearchSuggestions();
+                filterAndRender();
+            });
+
+            document.getElementById('groupFilter').addEventListener('change', filterAndRender);
+            document.getElementById('levelFilter').addEventListener('change', filterAndRender);
+            document.getElementById('sortBy').addEventListener('change', filterAndRender);
+
+            // Click outside suggestions to hide
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#searchInput')) {
+                    document.getElementById('searchSuggestions').classList.add('hidden');
+                }
+            });
+
             function createPrinciplesAccordion() {
                 const accordionContainer = document.getElementById('principles-accordion');
+                if (!accordionContainer) return; // Exit if container doesn't exist
+                
                 principlesData.forEach((item, index) => {
                     const div = document.createElement('div');
                     div.className = 'bg-white rounded-xl shadow-sm overflow-hidden';
@@ -522,7 +868,13 @@
                     return acc;
                 }, {});
 
-                new Chart(ctx, {
+                // Xóa biểu đồ cũ nếu tồn tại
+                if (window.foodChart) {
+                    window.foodChart.destroy();
+                }
+
+                // Tạo biểu đồ mới
+                window.foodChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
                         labels: ['Nên ăn', 'Ăn vừa phải', 'Ăn hạn chế', 'Cấm ăn'],
@@ -554,10 +906,14 @@
                                 position: 'bottom',
                                 labels: {
                                     boxWidth: 15,
-                                    padding: 20
+                                    padding: 20,
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        size: 12
+                                    }
                                 }
                             },
-                             tooltip: {
+                            tooltip: {
                                 callbacks: {
                                     label: function(context) {
                                         let label = context.label || '';
@@ -575,13 +931,31 @@
                     }
                 });
             }
-            
+
+            function updateStats() {
+                const levelCounts = foodData.reduce((acc, food) => {
+                    acc[food.level] = (acc[food.level] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const total = foodData.length;
+
+                // Cập nhật số lượng và thanh tiến trình
+                document.getElementById('level1Count').textContent = levelCounts[1] || 0;
+                document.getElementById('level3Count').textContent = levelCounts[3] || 0;
+                document.getElementById('level4Count').textContent = levelCounts[4] || 0;
+
+                document.getElementById('level1Bar').style.width = `${(levelCounts[1] / total * 100)}%`;
+                document.getElementById('level3Bar').style.width = `${(levelCounts[3] / total * 100)}%`;
+                document.getElementById('level4Bar').style.width = `${(levelCounts[4] / total * 100)}%`;
+            }
+
             // Initial setup
             switchTab('overview');
             renderFoodList(foodData);
-            createFilters();
             createPrinciplesAccordion();
             createOverviewChart();
+            updateStats();
 
             // Add Food Form Handler
             document.getElementById('addFoodForm').addEventListener('submit', function(e) {
